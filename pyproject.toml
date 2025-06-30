@@ -1,0 +1,113 @@
+[project]
+name = "multiprocessing-intenum"
+description = "IntEnumValue type for Python multiprocessing"
+readme = "README.md"
+license = "Apache-2.0"
+authors = [
+    { name = "Elmar Hoffmann", email = "elmar.hoffmann@credativ.de" }
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Typing :: Typed"
+]
+dynamic = ["version"]
+requires-python = ">=3.8"
+dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/credativ/python-multiprocessing-intenum"
+Github = "https://github.com/credativ/python-multiprocessing-intenum"
+Issues = "https://github.com/credativ/python-multiprocessing-intenum/issues"
+
+[build-system]
+requires = [
+    "setuptools>=61",
+    "setuptools-scm>=8.0",
+]
+build-backend = "setuptools.build_meta"
+
+[tool.uv]
+cache-keys = [{ file = "pyproject.toml" }, { git = { commit = true } }]
+
+[tool.setuptools_scm]
+write_to = "src/multiprocessing_intenum/_version.py"
+
+[tool.setuptools.package-data]
+"multiprocessing_intenum" = ["py.typed"]
+
+[dependency-groups]
+dev = [
+    # building
+    "build",
+    "setuptools_scm",
+
+    # linting
+    "ruff",
+    "mypy",
+
+    # testing
+    "coverage",
+]
+
+[tool.mypy]
+strict = true
+strict_optional = false
+disable_error_code = [
+    "type-arg"
+]
+warn_unused_ignores = true
+explicit_package_bases = true
+
+[tool.ruff]
+extend-exclude = ["src/multiprocessing_intenum/_version.py"]
+line-length = 119
+target-version = "py311"
+
+#[tool.ruff.format]
+
+[tool.ruff.lint]
+select = [ "ALL" ]
+ignore = [
+    # allow Any in function arguments & return type
+    "ANN401",
+    # allow else after return, it is more robust should the return be removed
+    "RET505",
+    # pytest is not used
+    "PT",
+    # allow "FIXME:" todo tags
+    "TD001",
+    # allow todo tags without author or issue
+    "TD002", "TD003",
+    # allow str.format(), which does not evaluate arbitrary expressions
+    "UP032",
+    # disalbe rules for issues that the formatter takes care of anyway
+    "COM",
+    "ISC",
+    "Q",
+    # disalbe rules that conflict with the formatter
+    # cf. https://docs.astral.sh/ruff/formatter/#conflicting-lint-rules
+    "D206",
+    "D300",
+    "E111",
+    "E114",
+    "E117",
+    "W191",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"**/tests/*" = ["D"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "pep257"
+
+[tool.coverage.run]
+omit = [
+    ".venv/*",
+    "src/*/_version.py",
+]
+parallel = true
+concurrency = [ "multiprocessing" ]
