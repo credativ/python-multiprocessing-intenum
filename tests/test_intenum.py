@@ -24,10 +24,52 @@ class Bar(IntEnumValue[BarEnum]):
     pass
 
 
+class TestMixin:
+    pass
+
+
+class MixedFoo(TestMixin, IntEnumValue[FooEnum]):
+    pass
+
+
 class IntEnumValueTestCase(TestCase):
     def test_init(self) -> None:
         foo = Foo(FooEnum.FOO)
         self.assertEqual(foo, FooEnum.FOO)
+
+    def test_init_no_specific_type(self) -> None:
+        class Baz(IntEnumValue):
+            pass
+
+        self.assertEqual(Baz.EnumType, IntEnum)  # type: ignore[misc]
+
+    def test_init_subsubclass(self) -> None:
+        class Baz(Bar[BarEnum]):
+            pass
+
+        self.assertEqual(Baz.EnumType, BarEnum)  # type: ignore[misc]
+
+    def test_init_subsubclass_no_specific_type(self) -> None:
+        class Baz(Bar):
+            pass
+
+        self.assertEqual(Baz.EnumType, BarEnum)  # type: ignore[misc]
+
+    def test_init_mixin(self) -> None:
+        foo = MixedFoo(FooEnum.FOO)
+        self.assertEqual(foo, FooEnum.FOO)
+
+    def test_init_multi_inheritance_mro(self) -> None:
+        class FooOrBar(Foo, Bar):
+            pass
+
+        self.assertEqual(FooOrBar.EnumType, FooEnum)  # type: ignore[misc]
+
+    def test_init_multi_inheritance_mro_generic(self) -> None:
+        class FooOrBar(Foo, IntEnumValue[BarEnum]):
+            pass
+
+        self.assertEqual(FooOrBar.EnumType, FooEnum)  # type: ignore[misc]
 
     def test_init_name(self) -> None:
         foo = Foo(FooEnum.FOO.name)

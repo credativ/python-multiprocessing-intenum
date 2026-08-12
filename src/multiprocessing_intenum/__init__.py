@@ -3,14 +3,13 @@
 import multiprocessing
 from enum import IntEnum
 from multiprocessing.synchronize import Lock, RLock
-from typing import Any, Generic, TypeVar, get_args
+from types import get_original_bases
+from typing import Any, get_args, get_origin
 
 from ._version import version as __version__  # noqa: F401
 
-T = TypeVar("T", bound=IntEnum)
 
-
-class IntEnumValue(Generic[T]):
+class IntEnumValue[T: IntEnum]:
     """A multiprocessing safe shared object for `IntEnum` enum values."""
 
     # Pre-initialize type here to avoid numerous type ignores elsewhere
@@ -18,9 +17,43 @@ class IntEnumValue(Generic[T]):
 
     @classmethod
     def __init_subclass__(cls) -> None:  # noqa: D105
-        # set EnumType to the specific type specified by subclass
-        orig_base = cls.__orig_bases__[0]  # type: ignore[attr-defined]
-        cls.EnumType = get_args(orig_base)[0]
+        # To provide extended type checking, we need to determine the specigic
+        # type of IntEnum we have been subclassed with and set the EnumType
+        # attribute accordingly.
+        #
+        # The classes that we have been subclassed from can fall into the
+        # following cases:
+        # 1. a generic class with a specific type given
+        # 2. a subclass of a generic class without a new specific type given
+        # 3. our base class or a subclass of it without a specific type given
+        # 4. a class that is not a subclass of us, e.g. a mixin class
+        #
+        # In case 1, our original bases do contain the generic class with its
+        # type argument included.
+        # In cases 2 and 3, our original bases do contain the class itself only.
+        # ie. with the type argument *not* included.
+        # In case 2, the class or a parent of it must itself have been case 1,
+        # thus our EnumType attribute is resolved to the correct value as per
+        # MRO already.
+        # In case 3, the EnumType attribute remains the default and no extended
+        # type checking will happen.
+        # In case 4, the class is to be ignored.
+        #
+        # Multiple inheritance (as in case 4) needs to be taken into account,
+        # we thus iterate over original bases in MRO and terminate if one of
+        # the conclusive cases 1-3 is identified.
+        #
+        for base in get_original_bases(cls):
+            # check if parent is a generic class that is a subclass of us (case 1)
+            origin = get_origin(base)
+            if origin is not None and issubclass(origin, IntEnumValue):
+                # set EnumType to the specific type of the generic class
+                cls.EnumType = get_args(base)[0]
+                break
+
+            # check if parent is a subclass of us (cases 2 and 3)
+            if isinstance(base, type) and issubclass(base, IntEnumValue):
+                break
 
     def __init__(self, value: T | str, lock: None | Lock | RLock = None) -> None:
         """Initialize IntEnumValue object.
