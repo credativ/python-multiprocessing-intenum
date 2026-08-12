@@ -43,7 +43,7 @@ jobs:
         run: uv run make coverage.xml coverage
 
       - name: Python Coverage report
-        uses: orgoro/coverage@v3.2
+        uses: orgoro/coverage@v3.3.1
         with:
           coverageFile: coverage.xml
           token: ${{ secrets.GITHUB_TOKEN }}
