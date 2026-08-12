@@ -13,7 +13,7 @@ specific `IntEnum` type are being assigned.
 
 ## License
 
-Copyright (C) 2024-2025 credativ GmbH https://www.credativ.de/en/
+Copyright (C) 2024-2026 credativ GmbH https://www.credativ.de/en/
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
