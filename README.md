@@ -42,7 +42,7 @@ apt-get install git python3
    . .venv/bin/activate
    ```
 
-1. Install Python requirements in the virtual environment::
+1. Install Python requirements in the virtual environment:
    ```
    uv sync --locked
    ```
